@@ -18,9 +18,8 @@ MODE = 'RGB'
 
 # 文件相关
 # 字体文件位置
-FONT_PATH = r'tk.ttf'
+FONT_PATH = './fonts/tk.ttf'
 # 保存图片格式
 PIC_SCHEME = 'pdf'
 # 图片存放目录
 PDF_DIR = './pdf'
-
