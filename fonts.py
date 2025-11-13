@@ -3,7 +3,7 @@ import os.path
 import re
 
 from PIL import Image, ImageDraw, ImageFont
-from PyPDF2 import PdfFileMerger
+from PyPDF2 import PdfMerger
 
 from config import *
 
@@ -35,7 +35,7 @@ class ArticleProducer(object):
 		self.font = ImageFont.truetype(FONT_PATH, FONT_SIZE)
 
 		self._init_painting()
-		self.pdf = PdfFileMerger()
+		self.pdf = PdfMerger()
 
 	def _init_painting(self):
 		"""
