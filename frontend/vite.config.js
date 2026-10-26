@@ -9,5 +9,5 @@ export default defineConfig({
       '/api': { target: 'http://127.0.0.1:8000', changeOrigin: true }
     }
   },
-  build: { outDir: 'dist', emptyOutDir: true }
+  build: { outDir: '../backend/web', emptyOutDir: true }
 })

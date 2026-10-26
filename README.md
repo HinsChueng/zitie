@@ -1,11 +1,13 @@
 # 字帖工坊 · 硬笔字帖生成
 
+> **仓库已迁移** → [HinsChueng/zitie](https://github.com/HinsChueng/zitie)
+>
+> 本仓库仅作过渡，代码与文档已全部搬到上面那个仓库（含旧脚本的完整历史），
+> 这里不再更新，请勿据此建站或二次分发。
+
 把任意一段中文变成可打印的字帖。核心是三件事：**版式做对、内容喂饱、出口打通**。
 
 面向成人硬笔练字场景，不追求"能出图"，追求"能直接印出来练"。
-
-> 这个仓库 2023 年是一个单文件脚本（`main.py` 一把梭，只出田字格）；2026 年重写为
-> FastAPI + Vue 的前后端分离版本，旧代码仍留在这份 git 历史里可查。
 
 ![界面](docs/screenshot.png)
 
@@ -73,7 +75,7 @@ python tools/selftest.py -v       # 附上每次渲染的指纹
 
 ```
 zitie-studio/
-├── run.py                  一键启动（加载 dist + 起后端 + 开浏览器）
+├── run.py                  一键启动（托管 backend/web + 起后端 + 开浏览器）
 ├── backend/
 │   ├── app/
 │   │   ├── main.py         FastAPI 路由
@@ -86,7 +88,8 @@ zitie-studio/
 │   │   └── fonts.py        字体注册（内置 + 系统发现 + 覆盖度 + 回退链）
 │   ├── data/charsets.json  高频字表（构建时生成，运行时不依赖 wordfreq）
 │   ├── data/fontcache.json 字体扫描缓存（自动生成，可删）
-│   └── fonts/tk.ttf        田英章楷书
+│   ├── fonts/tk.ttf        田英章楷书
+│   └── web/                前端构建产物（vite 直接输出到这里）
 ├── tools/selftest.py       功能自检（参数矩阵 + 规则断言 + 接口冒烟）
 └── frontend/               Vue 3 + Vite
     └── src/
@@ -101,13 +104,27 @@ zitie-studio/
 ### 生产模式（一条命令）
 
 ```bash
-cd zitie-studio/frontend && npm install && npm run build
+cd zitie-studio/frontend && npm install && npm run build   # 产物落在 backend/web
 cd .. && python run.py
 ```
 
 打开 http://127.0.0.1:8000
 
 > npm 若报 `@esbuild/win32-x64 could not be found`，补一句 `npm i -D @esbuild/win32-x64` 再构建。
+
+
+### 云服务器 / 容器部署
+
+单端口对外，前端产物由后端一并托管，不需要 nginx 配两套站点。
+
+```bash
+pip install -r backend/requirements.txt
+cd frontend && npm install && npm run build && cd ..
+PORT=8080 python run.py        # 读到 PORT 就自动绑 0.0.0.0、不开浏览器
+```
+
+`PORT` 由平台注入即可；反代到该端口就完事。系统字体在 Linux 上通常只有
+Noto CJK 一类，字体选择器会据此列出可用项，缺字会自动回退到内置楷书。
 
 ### 开发模式（前后端分离热更新）
 

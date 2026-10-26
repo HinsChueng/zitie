@@ -238,6 +238,13 @@ async def parse(file: UploadFile) -> JSONResponse:
     raise HTTPException(415, "目前仅支持 txt / md，其他格式请直接粘贴正文")
 
 
-DIST = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
-if DIST.exists():
+BACKEND_DIR = Path(__file__).resolve().parent.parent          # backend/
+ROOT_DIR = BACKEND_DIR.parent                                  # 项目根
+
+# 构建产物统一放 backend/web（跟着后端一起走，部署时不会漏）
+DIST = next(
+    (d for d in (BACKEND_DIR / "web", ROOT_DIR / "frontend" / "dist") if (d / "index.html").exists()),
+    None,
+)
+if DIST is not None:
     app.mount("/", StaticFiles(directory=str(DIST), html=True), name="static")

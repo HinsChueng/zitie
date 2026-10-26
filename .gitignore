@@ -1,6 +1,7 @@
 # 依赖与构建产物
 node_modules/
 frontend/dist/
+backend/web/
 __pycache__/
 *.pyc
 .venv/
