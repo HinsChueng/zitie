@@ -1,0 +1,7 @@
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pillow>=10.0
+pypdf>=4.0
+python-multipart>=0.0.9
+fonttools>=4.50
+zhconv>=1.4
