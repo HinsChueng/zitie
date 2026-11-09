@@ -171,6 +171,12 @@ def compose_rows(p) -> list[list[Slot | None]]:
     trace : 每字一遍描红
     mixed : 行内分段，前 demo_cells 格实心、中 trace_cells 格描红、其余留空
     rotate: 三行一组，示范行 → 描红行 → 空白行（经典诗文帖排法）
+    copy  : 一行原帖 + 若干空白行照着写
+    fade  : 每行首字实心，其余标为 trace，由渲染层按位置递减浓度
+    card  : 每字一块（范字 → 描红 → 空白），忽略断行与标点
+
+    竖排不在这里处理：本函数始终产出「行 → 格子」，
+    渲染层负责把行映射成自右向左的竖列，横竖排共用同一份编排数据。
     """
     lines = paragraphs(normalize(p.text, p.keep_punct, p.traditional), p.columns,
                        p.line_break_rule, p.break_at_punct)
@@ -212,6 +218,42 @@ def compose_rows(p) -> list[list[Slot | None]]:
                         else:
                             row.append(None)
                     rows.append(row)
+
+    elif p.mode == "copy":
+        # 对临：一行原帖（实心范字），下面留若干空白行照着写。
+        # 不并排占位，列数不变，打印时不会出现半页空栏。
+        blank_row: list[Slot | None] = []
+        for line in lines:
+            rows.append([Slot(ch, "demo") for ch in line])
+            for _ in range(p.copy_blank):
+                rows.append(list(blank_row))
+
+    elif p.mode == "fade":
+        # 渐隐临摹：每行首字实心示范，其后逐格变淡，写到行末几乎脱手。
+        # 浓度由渲染层按列序计算，这里只标出「首字 / 其余」两种语义。
+        for line in lines:
+            rows.append([Slot(ch, "demo" if i == 0 else "trace")
+                         for i, ch in enumerate(line)])
+
+    elif p.mode == "card":
+        # 生字卡：每字独立一块（范字 → 描红 → 空白），逐块横向排开。
+        # 忽略断行与标点，按全文顺序一字一块，适合生字表按字过关。
+        span = max(3, p.card_cells)
+        trace_n = max(0, min(p.card_trace, span - 2))
+        blank_n = span - 1 - trace_n
+        per_row = max(1, cols // span)
+        clean = normalize(p.text, p.keep_punct, p.traditional)
+        chars = [ch for ch in clean if ch != "\n" and ch not in ALL_PUNCT]
+        blocks = [
+            [Slot(ch, "demo")] + [Slot(ch, "trace")] * trace_n + [None] * blank_n
+            for ch in chars
+        ]
+        for start in range(0, len(blocks), per_row):
+            row: list[Slot | None] = []
+            for block in blocks[start:start + per_row]:
+                row.extend(block)
+            row.extend([None] * max(0, cols - len(row)))
+            rows.append(row)
 
     else:  # rotate
         blank_row: list[Slot | None] = []

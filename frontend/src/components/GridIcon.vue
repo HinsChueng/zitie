@@ -39,6 +39,15 @@ const parts = computed(() => {
     case 'line':
       return `<line x1="1" y1="${s / 2}" x2="${s - 1}" y2="${s / 2}"/>` +
         `<line x1="1" y1="${s - 1}" x2="${s - 1}" y2="${s - 1}"/>`
+    case 'pinyin4':
+      return box +
+        `<line x1="1" y1="${s / 3}" x2="${s - 1}" y2="${s / 3}" ${dashed}/>` +
+        `<line x1="1" y1="${2 * s / 3}" x2="${s - 1}" y2="${2 * s / 3}" ${dashed}/>`
+    case 'composition':
+      return box + `<circle cx="${mid}" cy="${mid}" r="1" fill="currentColor" stroke="none"/>`
+    case 'control':
+      return box +
+        `<path d="M2 ${mid} Q5 3 8 ${mid} T14 ${mid} Q17 ${s - 3} 20 ${mid}" fill="none"/>`
     default: return box
   }
 })

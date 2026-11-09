@@ -1,9 +1,8 @@
-"""一键启动：托管已构建的前端 + 后端 API，单端口对外。
+"""一键启动：本地提供已构建的前端 + 后端 API，单端口本机服务。
 
 用法：
     python run.py                 # 默认 127.0.0.1:8000，自动开浏览器
     python run.py --port 9000
-    PORT=8080 python run.py       # 云平台注入 PORT 时自动绑 0.0.0.0、不开浏览器
 
 构建前端（产物落在 backend/web）：
     cd frontend && npm install && npm run build

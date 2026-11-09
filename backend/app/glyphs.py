@@ -25,18 +25,24 @@ def hex_to_rgb(value: str) -> tuple[int, int, int]:
         return (31, 31, 31)
 
 
-def _blend(color: tuple[int, int, int], ratio: float, bg: int = 255) -> tuple[int, int, int]:
-    """把前景色按 ratio 混向背景色（白），得到浅灰效果"""
-    return tuple(round(bg - (bg - c) * ratio) for c in color)  # type: ignore[return-value]
+def _blend(color: tuple[int, int, int], ratio: float,
+           bg: tuple[int, int, int] = (255, 255, 255)) -> tuple[int, int, int]:
+    """把前景色按 ratio 混向纸色，得到浅色描红。
+
+    纸色跟着 paper_color 走，黑底碑帖模式下描红才不会算成「往白里混」。
+    """
+    return tuple(round(b - (b - c) * ratio) for c, b in zip(color, bg))  # type: ignore[return-value]
 
 
 class GlyphFactory:
     """font_paths 可以是一组字体：前面的缺字就依次往后借"""
 
     def __init__(self, font_paths, cell: int, ratio: float,
-                 font_color: str = "#1f1f1f", opacity: float = 0.22):
+                 font_color: str = "#1f1f1f", opacity: float = 0.22,
+                 paper_color: str = "#FFFFFF"):
         self.cell = cell
         self.color = hex_to_rgb(font_color)
+        self.paper = hex_to_rgb(paper_color)
         self.opacity = opacity
         size = max(8, round(cell * ratio))
         if isinstance(font_paths, (str, Path)):
@@ -121,16 +127,22 @@ class GlyphFactory:
                     draw.ellipse([x - r, y - r, x + r, y + r], fill=255)
         return out
 
-    def render(self, ch: str, style: str) -> tuple[Image.Image, Image.Image] | None:
-        """返回 (纯色层, 蒙版)，直接 page.paste(layer, pos, mask)"""
+    def render(self, ch: str, style: str,
+               opacity: float | None = None) -> tuple[Image.Image, Image.Image] | None:
+        """返回 (纯色层, 蒙版)，直接 page.paste(layer, pos, mask)。
+
+        opacity 给定时只覆盖本次的颜色浓度；字形蒙版仍走缓存，
+        渐隐临摹要逐格变淡，但不必为每个浓度重新栅格化汉字。
+        """
         punct = ch in ALL_PUNCT
         key = (ch, style, punct)
+        ratio = self.opacity if opacity is None else opacity
         if key in self._styled:
             cached = self._styled[key]
             if cached is None:
                 return None
             mask = cached
-            color = _blend(self.color, self.opacity) if style == "gray" else self.color
+            color = _blend(self.color, ratio, self.paper) if style == "gray" else self.color
             return Image.new("RGB", mask.size, color), mask
 
         base = self._mask(ch, punct)
@@ -146,5 +158,5 @@ class GlyphFactory:
             mask = base
 
         self._styled[key] = mask
-        color = _blend(self.color, self.opacity) if style == "gray" else self.color
+        color = _blend(self.color, ratio, self.paper) if style == "gray" else self.color
         return Image.new("RGB", mask.size, color), mask

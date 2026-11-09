@@ -1,7 +1,7 @@
 <script setup>
 /**
  * 字库选择：每款字体用自身字样渲染一个小样，直接看效果再选。
- * 图标走 /api/fonts/{id}/sample，由后端用该字体画「永字」两个字。
+ * 图标走 /api/fonts/{id}/sample，由后端用该字体画“永字”两个字。
  */
 import { nextTick, onMounted, ref, watch } from 'vue'
 
@@ -54,7 +54,7 @@ watch(() => props.modelValue, () => nextTick(revealSelection))
       <span class="font-badge sys" v-if="f.source === 'system'">系统</span>
     </button>
     <p v-if="!fonts.length" class="hint" style="grid-column: 1 / -1">
-      没有找到可用字体，请往 backend/fonts 放一个 ttf，或点下面的「重新扫描」。
+      没有找到可用字体，请往 backend/fonts 放一个 ttf，或点下面的“重新扫描”。
     </p>
   </div>
 </template>
@@ -80,7 +80,7 @@ watch(() => props.modelValue, () => nextTick(revealSelection))
   padding: 8px 4px 5px;
   border: 1px solid var(--line-strong);
   border-radius: 9px;
-  background: #fff;
+  background: var(--panel);
   cursor: pointer;
   transition: .14s;
   overflow: hidden;
@@ -115,9 +115,9 @@ watch(() => props.modelValue, () => nextTick(revealSelection))
   line-height: 1.4;
   padding: 0 4px;
   border-radius: 4px;
-  background: #f0eee8;
+  background: var(--bg);
   color: var(--muted);
 }
-.font-card.on .font-badge { background: #fff; color: var(--accent); }
+.font-card.on .font-badge { background: var(--panel); color: var(--accent); }
 .font-badge.sys { left: auto; right: 4px; background: transparent; padding: 0; }
 </style>
